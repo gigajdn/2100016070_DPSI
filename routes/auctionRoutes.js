@@ -3,6 +3,7 @@ const router = express.Router();
 const auctionController = require('../controllers/auctionController');
 const { authMiddleware } = require('../middlewares/authMiddleware');
 
+//authMiddleware digunakan untuk memastikan bahwa pengguna telah melakukan authentifikasi dengan login
 router.post('/auctions', authMiddleware, auctionController.createAuction);
 router.get('/auctions', authMiddleware, auctionController.getAuctions);
 router.get('/auctions/:id', authMiddleware, auctionController.getAuctionById);

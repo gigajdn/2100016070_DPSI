@@ -3,6 +3,7 @@ const router = express.Router();
 const itemRequestController = require('../controllers/itemRequestController');
 const { authMiddleware } = require('../middlewares/authMiddleware');
 
+//authMiddleware digunakan untuk memastikan bahwa pengguna telah melakukan authentifikasi dengan login
 router.post('/itemRequests', authMiddleware, itemRequestController.createItemRequest);
 router.get('/itemRequests', authMiddleware, itemRequestController.getItemRequests);
 router.get('/itemRequests/:id', authMiddleware, itemRequestController.getItemRequestById);
