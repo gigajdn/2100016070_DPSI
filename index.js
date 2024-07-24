@@ -32,6 +32,11 @@ app.use('/api', employeeRoutes);
 app.use('/api', auctionRoutes);
 app.use('/api', itemRequestRoutes);
 
+// Default route
+app.get('/', (req, res) => {
+  res.send('Welcome to Lelang System API');
+});
+
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
