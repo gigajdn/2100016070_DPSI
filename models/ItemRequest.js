@@ -5,7 +5,7 @@ const ItemRequestSchema = new Schema({
   itemName: { type: String, required: true },
   itemSpecification: { type: String, required: true },
   quantity: { type: Number, required: true },
-  status: { type: String, enum: ['pending', 'approved', 'rejected'], required: true },
+  status: { type: String, enum: ['pending', 'approved', 'rejected'], default:"pending", required: true },
   user: { type: Schema.Types.ObjectId, ref: 'User', required: true }
 }, {
   timestamps: true
