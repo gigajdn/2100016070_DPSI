@@ -1,10 +1,23 @@
 const Auction = require('../models/Auction');
-const User = require('../models/User');
+const ItemRequest = require('../models/ItemRequest');
 
 exports.createAuction = async (req, res) => {
   try {
-    const auction = new Auction(req.body);
+    const { item, highestBid, status, participants } = req.body;
+    
+    // Check if the item exists
+    const foundItem = await ItemRequest.findById(item);
+    if (!foundItem) {
+      return res.status(404).send({ error: 'Item not found' });
+    }
+
+    // Create the auction
+    const auction = new Auction({ item, highestBid, status, participants });
     await auction.save();
+
+    // Populate the item field with the corresponding item details
+    await auction.populate('item').execPopulate();
+
     res.status(201).send(auction);
   } catch (error) {
     res.status(400).send(error);
