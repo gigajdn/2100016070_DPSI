@@ -17,6 +17,7 @@ exports.createAuction = async (req, res) => {
 
     // Populate the item field with the corresponding item details
     await auction.populate('item').execPopulate();
+    await auction.populate('participants').execPopulate();
 
     res.status(201).send(auction);
   } catch (error) {
