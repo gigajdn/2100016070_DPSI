@@ -28,12 +28,8 @@ const userSchema = new mongoose.Schema({
   role: { 
     type: String, 
     enum: ['Admin', 'Employee', 'User'], 
-<<<<<<< HEAD
     required: true,
     default: "User" },
-=======
-    required: true },
->>>>>>> b8b58a706df2f8d745be7c0f91f1daca498af4e6
   tokens: [{
     token: {
       type: String,

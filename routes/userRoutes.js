@@ -3,11 +3,8 @@ const router = express.Router();
 const userController = require('../controllers/userController');
 const { authMiddleware, adminMiddleware } = require('../middlewares/authMiddleware');
 
-<<<<<<< HEAD
 //authMiddleware digunakan untuk memastikan bahwa pengguna telah melakukan authentifikasi dengan login
 //adminMiddleware merupakan pengecekan lebih lanjut dengan role yang ada pada pengguna (admin)
-=======
->>>>>>> b8b58a706df2f8d745be7c0f91f1daca498af4e6
 router.post('/users', authMiddleware, adminMiddleware, userController.createUser);
 router.get('/users', authMiddleware, adminMiddleware, userController.getUsers);
 router.get('/users/:id', authMiddleware, adminMiddleware, userController.getUserById);
