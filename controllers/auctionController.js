@@ -12,20 +12,19 @@ exports.createAuction = async (req, res) => {
       return res.status(404).send({ error: 'Item not found' });
     }
 
-    // Add user ID to participants
-    if (!auction.participants.includes(req.user._id)) {
-      auction.participants.push(req.user._id);
-    }
+    // Initialize participants with the user ID from req.user
+    const participants = [req.user._id];
 
     // Create the auction
     let auction = new Auction({ item, highestBid, status, participants });
     await auction.save();
 
     // Populate the item and participants fields with the corresponding details
-    auction = await Auction.findById(auction._id).populate('item').populate('participants').exec();
+    auction = await Auction.findById(auction._id).populate('item').populate('participants');
 
     res.status(201).send(auction);
   } catch (error) {
+    console.error('Error creating auction:', error);
     res.status(400).send({ error: 'Error creating auction', details: error.message });
   }
 };
