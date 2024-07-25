@@ -12,6 +12,7 @@ exports.createAuction = async (req, res) => {
     }
 
     // Create the auction
+    status = "closed";
     const auction = new Auction({ item, highestBid, status, participants });
     await auction.save();
 
