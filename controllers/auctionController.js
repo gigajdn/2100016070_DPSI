@@ -3,8 +3,9 @@ const ItemRequest = require('../models/ItemRequest');
 
 exports.createAuction = async (req, res) => {
   try {
-    const { item, highestBid, status, participants } = req.body;
-    
+    const { item, highestBid, participants } = req.body;
+    const status = "closed"; // Ensure status is correctly set to 'closed'
+
     // Check if the item exists
     const foundItem = await ItemRequest.findById(item);
     if (!foundItem) {
@@ -12,70 +13,83 @@ exports.createAuction = async (req, res) => {
     }
 
     // Create the auction
-    status = "closed";
-    const auction = new Auction({ item, highestBid, status, participants });
+    let auction = new Auction({ item, highestBid, status, participants });
     await auction.save();
 
-    // Populate the item field with the corresponding item details
-    await auction.populate('item').execPopulate();
-    await auction.populate('participants').execPopulate();
+    // Populate the item and participants fields with the corresponding details
+    auction = await Auction.findById(auction._id).populate('item').populate('participants').exec();
 
     res.status(201).send(auction);
   } catch (error) {
-    res.status(400).send(error);
+    res.status(400).send({ error: 'Error creating auction', details: error.message });
   }
 };
 
 exports.getAuctions = async (req, res) => {
   try {
-    const auctions = await Auction.find();
+    const auctions = await Auction.find().populate('item').populate('participants');
     res.status(200).send(auctions);
   } catch (error) {
-    res.status(500).send(error);
+    res.status(500).send({ error: 'Error retrieving auctions', details: error.message });
   }
 };
 
 exports.getAuctionById = async (req, res) => {
   try {
-    const auction = await Auction.findById(req.params.id);
+    const auction = await Auction.findById(req.params.id).populate('item').populate('participants');
     if (!auction) {
-      return res.status(404).send();
+      return res.status(404).send({ error: 'Auction not found' });
     }
     res.status(200).send(auction);
   } catch (error) {
-    res.status(500).send(error);
+    res.status(500).send({ error: 'Error retrieving auction', details: error.message });
   }
 };
 
 exports.updateAuction = async (req, res) => {
   try {
     const updates = Object.keys(req.body);
-    const allowedUpdates = ['item', 'highestBid', 'status', 'participants'];
+    const allowedUpdates = ['highestBid'];
     const isValidOperation = updates.every((update) => allowedUpdates.includes(update));
 
     if (!isValidOperation) {
+      console.log('Invalid updates:', updates);
       return res.status(400).send({ error: 'Invalid updates!' });
     }
 
-    const auction = await Auction.findById(req.params.id);
+    let auction = await Auction.findById(req.params.id);
     if (!auction) {
-      return res.status(404).send();
+      console.log('Auction not found:', req.params.id);
+      return res.status(404).send({ error: 'Auction not found' });
+    }
+
+    // Validate highestBid
+    if (req.body.highestBid !== undefined && req.body.highestBid <= auction.highestBid) {
+      return res.status(400).send({ error: 'New highestBid must be greater than the current highestBid' });
     }
 
     updates.forEach((update) => {
       auction[update] = req.body[update];
     });
 
+    // Add user ID to participants
+    if (!auction.participants.includes(req.user._id)) {
+      auction.participants.push(req.user._id);
+    }
+
     await auction.save();
+    auction = await Auction.findById(auction._id).populate('item').populate('participants');
+    console.log('Updated auction:', auction);
     res.status(200).send(auction);
   } catch (error) {
-    res.status(400).send(error);
+    console.error('Error updating auction:', error);
+    res.status(400).send({ error: 'Error updating auction', details: error.message });
   }
 };
 
 exports.deleteAuction = async (req, res) => {
   try {
-    const auction = await Auction.findByIdAndDelete(req.params.id);
+    const auction = await Auction.findByIdAndDelete(req.params.id).populate('item').populate('participants');
     if (!auction) {
       return res.status(404).send();
     }
@@ -87,7 +101,7 @@ exports.deleteAuction = async (req, res) => {
 
 exports.startAuction = async (req, res) => {
   try {
-    const auction = await Auction.findById(req.params.id);
+    const auction = await Auction.findById(req.params.id).populate('item').populate('participants');
     if (!auction) {
       return res.status(404).send();
     }
@@ -102,7 +116,7 @@ exports.startAuction = async (req, res) => {
 
 exports.closeAuction = async (req, res) => {
   try {
-    const auction = await Auction.findById(req.params.id);
+    const auction = await Auction.findById(req.params.id).populate('item').populate('participants');
     if (!auction) {
       return res.status(404).send();
     }
@@ -117,7 +131,7 @@ exports.closeAuction = async (req, res) => {
 
 exports.cancelAuction = async (req, res) => {
   try {
-    const auction = await Auction.findById(req.params.id);
+    const auction = await Auction.findById(req.params.id).populate('item').populate('participants');
     if (!auction) {
       return res.status(404).send();
     }
@@ -132,13 +146,13 @@ exports.cancelAuction = async (req, res) => {
 
 exports.confirmReceipt = async (req, res) => {
   try {
-    const auction = await Auction.findById(req.params.id);
+    const auction = await Auction.findById(req.params.id).populate('item').populate('participants');
     if (!auction) {
       return res.status(404).send();
     }
 
     // Assuming there's a way to confirm the receipt
-    // auction.receiptConfirmed = true;
+    auction.receiptConfirmed = true;
     await auction.save();
     res.status(200).send(auction);
   } catch (error) {
