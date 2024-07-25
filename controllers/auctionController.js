@@ -12,6 +12,11 @@ exports.createAuction = async (req, res) => {
       return res.status(404).send({ error: 'Item not found' });
     }
 
+    // Add user ID to participants
+    if (!auction.participants.includes(req.user._id)) {
+      auction.participants.push(req.user._id);
+    }
+
     // Create the auction
     let auction = new Auction({ item, highestBid, status, participants });
     await auction.save();
