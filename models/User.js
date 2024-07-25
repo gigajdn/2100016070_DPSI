@@ -28,7 +28,8 @@ const userSchema = new mongoose.Schema({
   role: { 
     type: String, 
     enum: ['Admin', 'Employee', 'User'], 
-    required: true },
+    required: true,
+    default: "User" },
   tokens: [{
     token: {
       type: String,
