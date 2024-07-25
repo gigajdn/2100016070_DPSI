@@ -3,7 +3,7 @@ const ItemRequest = require('../models/ItemRequest');
 
 exports.createAuction = async (req, res) => {
   try {
-    const { item, highestBid, participants } = req.body;
+    const { item, highestBid } = req.body;
     const status = "closed"; // Ensure status is correctly set to 'closed'
 
     // Check if the item exists
